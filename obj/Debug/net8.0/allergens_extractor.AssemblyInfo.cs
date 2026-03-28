@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("allergens_extractor")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e372d36ea6807228fea16679f417d70718634136")]
 [assembly: System.Reflection.AssemblyProductAttribute("allergens_extractor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("allergens_extractor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
