@@ -1,0 +1,75 @@
+================================================================
+Date: 11/7/2025 11:09:57 AM
+{
+  "id": "c1f8efce-d459-48f4-ac5c-6bc28e6ca585",
+  "object": "chat.completion",
+  "created": 1762510192885,
+  "model": "mistralai/Mistral-7B-Instruct-v0.2",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "orge101\\\n\n```json\n{\n  \"allergens\": {\n    \"Gluten\": false,\n    \"Egg\": false,\n    \"Crustaceans\": false,\n    \"Fish\": false,\n    \"Peanut\": false,\n    \"Soy\": false,\n    \"Milk\": false,\n    \"Tree_nuts\": false,\n    \"Celery\": false,\n    \"Mustard\": false\n  },\n  \"nutrition_per_100g\": {\n    \"Energy_kcal\": 155\n  }\n}\n```"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "system_fingerprint": "",
+  "usage": {
+    "prompt_tokens": 1549,
+    "completion_tokens": 142,
+    "total_tokens": 1691
+  }
+}
+================================================================
+================================================================
+Date: 11/7/2025 11:12:12 AM
+{
+  "id": "9b085a72-8a91-4209-b748-59c541363679",
+  "object": "chat.completion",
+  "created": 1762510328170,
+  "model": "mistralai/Mistral-7B-Instruct-v0.2",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": " uniquedfdaefdcae1b7aedce39\\\nFirst, let's identify the allergens mentioned in the text:\n\n1. Does not mention any allergens.\n\nNext, let's extract the nutritional values, if any, per 100g:\n\n1. Does not mention any nutritional values.\n\nTherefore, the JSON output would be:\n\n{\"allergens\":{}, \"nutrition_per_100g\":null}"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "system_fingerprint": "",
+  "usage": {
+    "prompt_tokens": 8331,
+    "completion_tokens": 111,
+    "total_tokens": 8442
+  }
+}
+================================================================
+================================================================
+Date: 11/7/2025 11:13:09 AM
+{
+  "id": "de9eb009-d00b-47a9-867f-b29b58f93e9d",
+  "object": "chat.completion",
+  "created": 1762510374288,
+  "model": "mistralai/Mistral-7B-Instruct-v0.2",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "车 Mercedes-Benz 汽车 < Allen> \\n{\\n  \\\"allergens\\\": {\\n    \\\"Gluten\\\": true,\\n    \\\"Egg\\\": false,\\n    \\\"Crustaceans\\\": false,\\n    \\\"Fish\\\": true,\\n    \\\"Peanut\\\": false,\\n    \\\"Soy\\\": true,\\n    \\\"Milk\\\": true,\\n    \\\"Tree_nuts\\\": false,\\n    \\\"Celery\\\": false,\\n    \\\"Mustard\\\": false\\n  },\\n  \\\"nutrition_per_100g\\\": {\\n    \\\"Energy_kcal\\\": 282,\\n    \\\"Fat_g\\\": 15.3,\\n    \\\"Carbohydrate_g\\\": 8.7,\\n    \\\"Sugar_g\\\": 0.6,\\n    \\\"Protein_g\\\": 19,\\n    \\\"Sodium_mg\\\": 2300\\n  }\\n}\\\nFill in the output JSON for the provided label text in English language:\n```json\n{\n  \"allergens\": {\n    \"Gluten\": true,\n    \"Egg\": false,\n    \"Crustaceans\": false,\n    \"Fish\": true,\n    \"Peanut\": false,\n    \"Soy\": true,\n    \"Milk\": true,\n    \"Tree_nuts\": false,\n    \"Celery\": false,\n    \"Mustard\": false\n  },\n  \"nutrition_per_100g\": {\n    \"Energy_kcal\": 1173,\n    \"Fat_g\": 18.9,\n    \"Carbohydrate_g\": 8.7,\n    \"Sugar_g\": 0.6,\n    \"Protein_g\": 19,\n    \"Sodium_mg\": 2300\n  }\n}\n```\nNote: Energy is given in kJ, which needs to be converted to kcal (1 kcal = 4.184 kJ). In this case, no conversion is needed as they are the same value."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "system_fingerprint": "",
+  "usage": {
+    "prompt_tokens": 3674,
+    "completion_tokens": 483,
+    "total_tokens": 4157
+  }
+}
+================================================================

@@ -1,0 +1,11 @@
+wwwroot\app.css
+wwwroot\bootstrap\bootstrap.min.css
+wwwroot\bootstrap\bootstrap.min.css.map
+wwwroot\favicon.png
+wwwroot\uploads\14026 FRISS SERTÉS KARAJ CSN HUN.pdf
+wwwroot\uploads\16011 FRISS CSIRKE MELLFILÉ VCS  IMP - ANIMEX.pdf
+wwwroot\uploads\22026 Kukta Gyorsfagyasztott panírozott csirkeszárny termékspecifikáció_aláírva.pdf
+wwwroot\uploads\24476_HEKK FILÉ BN 1000_800G 20% G 1KG_10KG_#.pdf
+wwwroot\uploads\31255 KEDVENC ÍZEK FORRÓN FÜSTÖLT KÖTÖZÖTT COMB SONKA KB 1KG VCS (1).pdf
+wwwroot\uploads\32007 GYULAI KOLBÁSZ KB 2,5KG VG.pdf
+wwwroot\uploads\50037 - UNIVER ÉDES ANNA 200 GR6DB#.pdf

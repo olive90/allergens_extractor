@@ -1,0 +1,241 @@
+﻿@page "/"
+@using Newtonsoft.Json
+@using System.Text.RegularExpressions
+@using System.Text.Json
+@using Newtonsoft.Json.Linq
+@using allergens_extractor.Models
+@using allergens_extractor.Utils
+@using iText.Kernel.Pdf
+@using iText.Kernel.Pdf.Canvas.Parser
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<PageTitle>Allergens and Nutritional Values Extractor</PageTitle>
+
+<h3>Upload PDF</h3>
+
+<InputFile OnChange="Extraction" accept=".pdf" />
+<br />
+<ul>
+    @foreach (var message in Messages)
+    {
+        <li>@message</li>
+    }
+</ul>
+<br />
+
+@if (!string.IsNullOrEmpty(view_result))
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Raw Response</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@view_result</td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+<h3>Product Information</h3>
+
+@if (product != null)
+{
+    <h5>Allergens</h5>
+    <table class="table table-bordered table-sm">
+        <thead>
+            <tr>
+                <th>Allergen</th>
+                <th>Present</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var prop in typeof(Allergens).GetProperties())
+            {
+                <tr>
+                    <td>@prop.Name</td>
+                    <td>@(product.allergens != null ? prop.GetValue(product.allergens)?.ToString() : "N/A")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h5>Nutrition per 100g</h5>
+    <table class="table table-bordered table-sm">
+        <thead>
+            <tr>
+                <th>Nutrient</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var prop in typeof(Nutrition).GetProperties())
+            {
+                <tr>
+                    <td>@prop.Name</td>
+                    <td>@(product.nutrition_per_100g != null ? prop.GetValue(product.nutrition_per_100g)?.ToString() : "N/A")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<string> Messages = new();
+    private string extracted_text = string.Empty;
+    private string view_result = string.Empty;
+
+    private ProductInfo product;
+
+    private async Task Extraction(InputFileChangeEventArgs e)
+    {
+        Messages.Clear();
+        extracted_text = "";
+        view_result = "";
+        product = new ProductInfo();
+        StateHasChanged();
+
+        var file = e.File;
+        if (file == null || !file.Name.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+        {
+            Messages.Add($"Please select a valid PDF file.");
+            // Trigger UI update
+            StateHasChanged();
+
+            return;
+        }
+
+        var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        Directory.CreateDirectory(uploadFolder);
+
+        var filePath = Path.Combine(uploadFolder, file.Name);
+
+        if (System.IO.File.Exists(filePath))
+        {
+            System.IO.File.Delete(filePath);
+        }
+
+        await using (var writeStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+        await using (var uploadStream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024))
+        {
+            await uploadStream.CopyToAsync(writeStream);
+            Messages.Add($"File uploaded successfully. File Name: {file.Name}");
+            // Trigger UI update
+            StateHasChanged();
+        }
+
+        if (System.IO.File.Exists(filePath))
+        {
+            Messages.Add($"Text Extraction is in progress...");
+            // Trigger UI update
+            StateHasChanged();
+            await Task.Delay(10000);
+
+            await using (var readStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                string pdfPath = System.IO.Path.Combine(filePath);
+                var reader = new PdfReader(pdfPath);
+                var doc = new PdfDocument(reader);
+                var result = "";
+
+                for (int i = 1; i <= doc.GetNumberOfPages(); i++)
+                {
+                    var text = PdfTextExtractor.GetTextFromPage(doc.GetPage(i));
+                    result += $"Page {i}:\n{text}";
+                }
+
+                string prompt = "You are a multilingual information extraction assistant.\r\n\r\n    Your task is to analyze the following text extracted from a food product label\r\n    (in English, French, Spanish, or Hungarian) and identify ONLY the allergens and nutritional values listed below.\r\n\r\n    ---\r\n    Allergens to check:\r\n    Gluten, Egg, Crustaceans, Fish, Peanut, Soy, Milk, Tree nuts, Celery, Mustard\r\n\r\n    Nutritional values to extract (per 100g if available):\r\n    Energy, Fat, Carbohydrate, Sugar, Protein, Sodium\r\n    ---\r\n\r\n    Return the results in valid JSON with the following structure:\r\n    {\r\n      \"allergens\": {\r\n        \"Gluten\": true/false,\r\n        \"Egg\": true/false,\r\n        \"Crustaceans\": true/false,\r\n        \"Fish\": true/false,\r\n        \"Peanut\": true/false,\r\n        \"Soy\": true/false,\r\n        \"Milk\": true/false,\r\n        \"Tree_nuts\": true/false,\r\n        \"Celery\": true/false,\r\n        \"Mustard\": true/false\r\n      },\r\n      \"nutrition_per_100g\": {\r\n        \"Energy_kcal\": number|null,\r\n        \"Fat_g\": number|null,\r\n        \"Carbohydrate_g\": number|null,\r\n        \"Sugar_g\": number|null,\r\n        \"Protein_g\": number|null,\r\n        \"Sodium_mg\": number|null\r\n      }\r\n    }\r\n\r\n    Rules:\r\n    - Output must be valid JSON only — no explanations or text.\r\n    - If a numeric value is not found, return null.\r\n    - If an allergen is not mentioned, return false; if present, return true.\r\n    - Recognize English, French, Spanish, and Hungarian terms.\r\n    - Convert energy to kcal if given in kJ (1 kcal = 4.184 kJ).\r\n    - Convert sodium from salt if mentioned (salt [g] × 393 = sodium [mg]).\r\n    - Respond ONLY with the JSON object.\r\n\r\n    ---\r\n    Input text: ";
+
+                var ser_text = JsonConvert.SerializeObject(prompt + result + " Output JSON:");
+
+                Messages.Add($"Extraction completed...");
+                Messages.Add($"Getting Allergens and Nutrition Values From LLM...");
+                // Trigger UI update
+                StateHasChanged();
+
+                await Task.Delay(10000);
+
+                //API call here
+
+                string uri = "";
+                string token = "";
+
+                string base_url = string.Empty;
+
+                var reqHeader = new List<KeyValuePair<string, string>>()
+                    {
+                        new KeyValuePair<string, string>("Authorization", "Bearer " + token)
+                    };
+
+                var reqBody = new ApiRequest
+                    {
+                        messages = new List<Messages>
+                        {
+                            new Messages
+                            {
+                                role = "assistant",
+                                content = ser_text
+                            }
+                        },
+                        model = "mistralai/Mistral-7B-Instruct-v0.2:featherless-ai"
+                    };
+
+                ApiCaller apiCaller = new ApiCaller();
+
+                dynamic apiResponse = apiCaller.RestApiCalling(uri, "POST", reqHeader, reqBody);
+
+                var resultResponse = JsonConvert.DeserializeObject(apiResponse.Result);
+
+                using (StreamWriter writer = new StreamWriter("wwwroot/data/output.txt", append: true))
+                {
+                    writer.WriteLine("================================================================");
+                    writer.WriteLine("Date: " + DateTime.Now);
+                    writer.WriteLine(resultResponse);
+                    writer.WriteLine("================================================================");
+                }
+
+                var resultContent = resultResponse.choices[0].message.content;
+
+                try
+                {
+                    Messages.Add($"Parsing Json Data...");
+                    // Trigger UI update
+                    StateHasChanged();
+                    await Task.Delay(10000);
+
+                    string pattern = @"\{[\s\S]*\}"; // Matches the first JSON-like curly block
+                    Match match = Regex.Match(resultContent, pattern);
+
+                    if (match.Success)
+                    {
+                        string jsonPart = match.Value;
+                        string jsonData = Regex.Unescape(jsonPart);
+                        product = JsonConvert.DeserializeObject<ProductInfo>(jsonData);
+                        view_result = jsonData;
+                        Messages.Add($"Extraction Completed...");
+                        // Trigger UI update
+                        StateHasChanged();
+                    }
+                    else
+                    {
+                        view_result = "Not a valid JSON";
+                    }
+                }
+                catch(Exception)
+                {
+                    view_result = string.Empty;
+                    throw;
+                }
+            }
+        }
+        else
+        {
+            Messages.Add($"File not exists. Please select again. Selected file Name: {file.Name}");
+            // Trigger UI update
+            StateHasChanged();
+        }
+    }
+}
